@@ -8,10 +8,10 @@ CONFIG_FILE="/etc/realm/config.toml"
 check_root
 
 add_port() {
-    echo -e "\n${CYAN}--- THÊM CỔNG CHUYỂN TIẾP ---${NC}"
-    read -p "Nhập Cổng (Port) lắng nghe trên VPS hiện tại: " listen_port
-    read -p "Nhập IP đích (IP Node Gốc): " remote_ip
-    read -p "Nhập Cổng đích (Port Node Gốc): " remote_port
+    echo -e "\n${BLUE}--- THÊM CỔNG CHUYỂN TIẾP ---${NC}"
+    read -p "Nhập Cổng lắng nghe trên VPS hiện tại: " listen_port
+    read -p "Nhập IP Node Gốc: " remote_ip
+    read -p "Nhập Cổng Node Gốc: " remote_port
 
     if [[ -z "$listen_port" || -z "$remote_ip" || -z "$remote_port" ]]; then
         print_error "Thông tin không được để trống."
@@ -28,8 +28,8 @@ add_port() {
 }
 
 delete_port() {
-    echo -e "\n${CYAN}--- XÓA CỔNG CHUYỂN TIẾP ---${NC}"
-    read -p "Nhập Cổng lắng nghe cần xóa (VD: 8080): " listen_port
+    echo -e "\n${BLUE}--- XÓA CỔNG CHUYỂN TIẾP ---${NC}"
+    read -p "Nhập Cổng cần xóa (VD: 8080): " listen_port
 
     if [[ -z "$listen_port" ]]; then
         print_error "Cổng không hợp lệ."
@@ -59,8 +59,8 @@ edit_config() {
 }
 
 check_traffic() {
-    echo -e "\n${CYAN}--- KIỂM TRA LƯU LƯỢNG KẾT NỐI ---${NC}"
-    read -p "Nhập Cổng (Port) cần kiểm tra: " check_port
+    echo -e "\n${BLUE}--- KIỂM TRA LƯU LƯỢNG KẾT NỐI ---${NC}"
+    read -p "Nhập Cổng cần kiểm tra: " check_port
 
     if [[ -z "$check_port" ]]; then
         print_error "Cổng không được để trống."
@@ -91,11 +91,12 @@ check_traffic() {
 }
 
 while true; do
-    echo -e "\n${CYAN}╔══════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC}         ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}         ${CYAN}║${NC}"
-    echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
-    check_service_status
-    echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
+    echo -e "\n${BLUE}╔══════════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║${NC}         ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}         ${BLUE}║${NC}"
+    echo -e "${BLUE}╠══════════════════════════════════════════════════╣${NC}"
+    echo -e "${BLUE}Tác giả:${NC} Vietnamvpn | ${BLUE}Website:${NC} https://linksub24h.com"
+    echo -e "check_service_status"
+    echo -e "${BLUE}╠══════════════════════════════════════════════════╣${NC}"
     echo -e "  ${YELLOW}1${NC} Thêm cổng chuyển tiếp mới"
     echo -e "  ${YELLOW}2${NC} Xóa cổng chuyển tiếp hiện có"
     echo -e "  ${YELLOW}3${NC} Sửa file cấu hình thủ công"
@@ -104,7 +105,7 @@ while true; do
     echo -e "  ${YELLOW}6${NC} Khởi động lại dịch vụ Realm"
     echo -e "  ${YELLOW}7${NC} Gỡ cài đặt toàn bộ"
     echo -e "  ${RED}0${NC} Thoát chương trình"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}╚══════════════════════════════════════════════════╝${NC}"
     read -p "Nhập lựa chọn của bạn: " choice
 
     case $choice in
