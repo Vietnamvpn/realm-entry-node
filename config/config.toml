@@ -2,4 +2,3 @@
 no_tcp = false
 use_udp = true
 
-# Các luồng ánh xạ [[endpoints]] sẽ được tự động thêm vào bên dưới

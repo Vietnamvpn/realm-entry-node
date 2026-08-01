@@ -58,29 +58,63 @@ edit_config() {
     print_info "Đã áp dụng thay đổi và khởi động lại Realm."
 }
 
+check_traffic() {
+    echo -e "\n${CYAN}--- KIỂM TRA LƯU LƯỢNG KẾT NỐI ---${NC}"
+    read -p "Nhập Cổng (Port) cần kiểm tra: " check_port
+
+    if [[ -z "$check_port" ]]; then
+        print_error "Cổng không được để trống."
+        return
+    fi
+
+    echo -e "\n${YELLOW}[+] Đang kiểm tra kết nối TCP (VLESS/Trojan/Shadowsocks...):${NC}"
+    TCP_RESULT=$(ss -tunp | grep ":$check_port ")
+    if [[ -n "$TCP_RESULT" ]]; then
+        echo "$TCP_RESULT"
+    else
+        echo "-> Không có kết nối TCP nào đang hoạt động."
+    fi
+
+    echo -e "\n${YELLOW}[+] Đang kiểm tra kết nối UDP (Hysteria2/WireGuard/TUIC...):${NC}"
+    if ! command -v tcpdump &> /dev/null; then
+        apt-get install tcpdump -y -q > /dev/null 2>&1
+    fi
+    
+    echo -e "${CYAN}--> Vui lòng mở App và lướt web ngay bây giờ. Đang chờ 5 giây để bắt tín hiệu...${NC}"
+    timeout 5 tcpdump -i any udp port "$check_port" -n -c 10 2>/dev/null
+    
+    if [ $? -eq 124 ]; then
+        echo -e "${RED}-> Không phát hiện tín hiệu UDP nào trong 5 giây qua.${NC}"
+    else
+        echo -e "${GREEN}-> Đã bắt được dữ liệu UDP thành công.${NC}"
+    fi
+}
+
 while true; do
-    echo -e "\n=============================="
-    echo -e "   ${CYAN}QUẢN LÝ REALM (Lệnh: vvc)${NC}   "
-    echo -e "=============================="
+    echo -e "\n${CYAN}╔══════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}      ${GREEN}🚀 BẢNG ĐIỀU KHIỂN REALM ENTRY NODE 🚀${NC}      ${CYAN}║${NC}"
+    echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
     check_service_status
-    echo "------------------------------"
-    echo "1. Thêm cổng chuyển tiếp mới"
-    echo "2. Xóa cổng chuyển tiếp hiện có"
-    echo "3. Sửa file cấu hình thủ công"
-    echo "4. Cập nhật hệ thống (Code & Lõi)"
-    echo "5. Khởi động lại dịch vụ Realm"
-    echo "6. Gỡ cài đặt toàn bộ"
-    echo "0. Thoát chương trình"
-    echo "------------------------------"
-    read -p "Nhập lựa chọn của bạn: " choice
+    echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
+    echo -e "  ${YELLOW}[1]${NC} Thêm cổng chuyển tiếp mới"
+    echo -e "  ${YELLOW}[2]${NC} Xóa cổng chuyển tiếp hiện có"
+    echo -e "  ${YELLOW}[3]${NC} Sửa file cấu hình thủ công"
+    echo -e "  ${YELLOW}[4]${NC} Kiểm tra App có đi qua VPS (TCP & UDP)"
+    echo -e "  ${YELLOW}[5]${NC} Cập nhật hệ thống (Code & Lõi)"
+    echo -e "  ${YELLOW}[6]${NC} Khởi động lại dịch vụ Realm"
+    echo -e "  ${YELLOW}[7]${NC} Gỡ cài đặt toàn bộ"
+    echo -e "  ${RED}[0]${NC} Thoát chương trình"
+    echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
+    read -p " 👉 Nhập lựa chọn của bạn: " choice
 
     case $choice in
         1) add_port ;;
         2) delete_port ;;
         3) edit_config ;;
-        4) bash "$INSTALL_DIR/scripts/update.sh" ;;
-        5) systemctl restart realm && print_info "Đã khởi động lại Realm." ;;
-        6) bash "$INSTALL_DIR/scripts/uninstall.sh" ; exit 0 ;;
+        4) check_traffic ;;
+        5) bash "$INSTALL_DIR/scripts/update.sh" ;;
+        6) systemctl restart realm && print_info "Đã khởi động lại Realm." ;;
+        7) bash "$INSTALL_DIR/scripts/uninstall.sh" ; exit 0 ;;
         0) exit 0 ;;
         *) print_error "Lựa chọn không hợp lệ." ;;
     esac
