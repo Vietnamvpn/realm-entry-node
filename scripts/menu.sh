@@ -92,10 +92,10 @@ check_traffic() {
 
 while true; do
     echo -e "\n${BLUE}╔═════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║${NC}         ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}         ${BLUE}║${NC}"
+    echo -e "${BLUE}║${NC}              ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}              ${BLUE}║${NC}"
     echo -e "${BLUE}╠═════════════════════════════════════════════════════════════╣${NC}"
-    echo -e "${BLUE}Tác giả:${NC} Vietnamvpn | ${BLUE}Website:${NC} https://linksub24h.com"
-    echo -e "$(check_service_status)"
+    echo -e "  ${BLUE}Tác giả:${NC} Vietnamvpn | ${BLUE}Website:${NC} https://linksub24h.com"
+    echo -e "  $(check_service_status)"
     echo -e "${BLUE}╠═════════════════════════════════════════════════════════════╣${NC}"
     echo -e "  ${YELLOW}1${NC} Thêm cổng chuyển tiếp mới"
     echo -e "  ${YELLOW}2${NC} Xóa cổng chuyển tiếp hiện có"
