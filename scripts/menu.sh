@@ -96,14 +96,14 @@ while true; do
     echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
     check_service_status
     echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
-    echo -e "  ${YELLOW}[1]${NC} Thêm cổng chuyển tiếp mới"
-    echo -e "  ${YELLOW}[2]${NC} Xóa cổng chuyển tiếp hiện có"
-    echo -e "  ${YELLOW}[3]${NC} Sửa file cấu hình thủ công"
-    echo -e "  ${YELLOW}[4]${NC} Kiểm tra App có đi qua VPS (TCP & UDP)"
-    echo -e "  ${YELLOW}[5]${NC} Cập nhật hệ thống (Code & Lõi)"
-    echo -e "  ${YELLOW}[6]${NC} Khởi động lại dịch vụ Realm"
-    echo -e "  ${YELLOW}[7]${NC} Gỡ cài đặt toàn bộ"
-    echo -e "  ${RED}[0]${NC} Thoát chương trình"
+    echo -e "  ${YELLOW}1${NC} Thêm cổng chuyển tiếp mới"
+    echo -e "  ${YELLOW}2${NC} Xóa cổng chuyển tiếp hiện có"
+    echo -e "  ${YELLOW}3${NC} Sửa file cấu hình thủ công"
+    echo -e "  ${YELLOW}4${NC} Kiểm tra App có đi qua VPS hay không"
+    echo -e "  ${YELLOW}5${NC} Cập nhật hệ thống"
+    echo -e "  ${YELLOW}6${NC} Khởi động lại dịch vụ Realm"
+    echo -e "  ${YELLOW}7${NC} Gỡ cài đặt toàn bộ"
+    echo -e "  ${RED}0${NC} Thoát chương trình"
     echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
     read -p " 👉 Nhập lựa chọn của bạn: " choice
 

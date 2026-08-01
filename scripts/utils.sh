@@ -27,8 +27,8 @@ print_error() {
 
 check_service_status() {
     if systemctl is-active --quiet realm; then
-        echo -e "Trạng thái dịch vụ: ${GREEN}Đang hoạt động (Active)${NC}"
+        echo -e "Trạng thái: ${GREEN}Active${NC}"
     else
-        echo -e "Trạng thái dịch vụ: ${RED}Đã dừng (Inactive)${NC}"
+        echo -e "Trạng thái: ${RED}Inactive${NC}"
     fi
 }
