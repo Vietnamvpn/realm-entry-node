@@ -8,7 +8,7 @@ CONFIG_FILE="/etc/realm/config.toml"
 check_root
 
 add_port() {
-    echo -e "\n${BLUE}--- THÊM CỔNG CHUYỂN TIẾP ---${NC}"
+    echo -e "\n${BLUE}===== THÊM CỔNG CHUYỂN TIẾP =====${NC}"
     read -p "Nhập Cổng lắng nghe trên VPS hiện tại: " listen_port
     read -p "Nhập IP Node Gốc: " remote_ip
     read -p "Nhập Cổng Node Gốc: " remote_port
@@ -28,7 +28,7 @@ add_port() {
 }
 
 delete_port() {
-    echo -e "\n${BLUE}--- XÓA CỔNG CHUYỂN TIẾP ---${NC}"
+    echo -e "\n${BLUE}===== XÓA CỔNG CHUYỂN TIẾP =====${NC}"
     read -p "Nhập Cổng cần xóa (VD: 8080): " listen_port
 
     if [[ -z "$listen_port" ]]; then
@@ -59,7 +59,7 @@ edit_config() {
 }
 
 check_traffic() {
-    echo -e "\n${BLUE}--- KIỂM TRA LƯU LƯỢNG KẾT NỐI ---${NC}"
+    echo -e "\n${BLUE}===== KIỂM TRA LƯU LƯỢNG KẾT NỐI =====${NC}"
     read -p "Nhập Cổng cần kiểm tra: " check_port
 
     if [[ -z "$check_port" ]]; then
