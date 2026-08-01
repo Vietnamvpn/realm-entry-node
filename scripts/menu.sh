@@ -92,9 +92,9 @@ check_traffic() {
 
 while true; do
     echo -e "\n${CYAN}╔══════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC}      ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}      ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}         ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}         ${CYAN}║${NC}"
     echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
-    check_service_status
+    echo -e "Trạng thái: $(check_service_status)"
     echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
     echo -e "  ${YELLOW}1${NC} Thêm cổng chuyển tiếp mới"
     echo -e "  ${YELLOW}2${NC} Xóa cổng chuyển tiếp hiện có"
