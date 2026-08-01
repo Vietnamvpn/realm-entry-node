@@ -1,0 +1,10 @@
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+Thumbs.db
+*.log
+*.tar.gz
+/tmp/
+.vscode/
+.idea/
