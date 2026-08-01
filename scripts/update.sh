@@ -9,7 +9,7 @@ print_info "Đang cập nhật mã nguồn quản lý từ GitHub..."
 cd "$INSTALL_DIR" || exit
 git pull origin main
 
-# Tự động cấp lại quyền thực thi cho toàn bộ script
+# Tự động cấp lại quyền thực thi
 chmod +x "$INSTALL_DIR/scripts/"*.sh
 chmod +x /usr/local/bin/vvc
 
@@ -28,5 +28,5 @@ rm -f realm.tar.gz
 systemctl start realm
 print_info "Cập nhật mã nguồn và lõi Realm hoàn tất!"
 
-# Tự động nạp và mở lại giao diện menu mới ngay lập tức
+# Tự động nạp lại giao diện menu mới sau khi cập nhật xong
 exec bash "$INSTALL_DIR/scripts/menu.sh"
