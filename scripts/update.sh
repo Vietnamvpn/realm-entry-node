@@ -9,6 +9,10 @@ print_info "Đang cập nhật mã nguồn quản lý từ GitHub..."
 cd "$INSTALL_DIR" || exit
 git pull origin main
 
+# Tự động cấp lại quyền thực thi sau khi tải code mới tránh lỗi Permission denied
+chmod +x "$INSTALL_DIR/scripts/"*.sh
+chmod +x /usr/local/bin/vvc
+
 print_info "Đang cập nhật lõi Realm lên bản mới nhất..."
 REALM_URL="https://github.com/zhboner/realm/releases/latest/download/realm-x86_64-unknown-linux-gnu.tar.gz"
 
