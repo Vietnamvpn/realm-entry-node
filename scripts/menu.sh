@@ -92,7 +92,7 @@ check_traffic() {
 
 while true; do
     echo -e "\n${CYAN}╔══════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║${NC}      ${GREEN}🚀 BẢNG ĐIỀU KHIỂN REALM ENTRY NODE 🚀${NC}      ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}      ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}      ${CYAN}║${NC}"
     echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
     check_service_status
     echo -e "${CYAN}╠══════════════════════════════════════════════════╣${NC}"
@@ -105,7 +105,7 @@ while true; do
     echo -e "  ${YELLOW}7${NC} Gỡ cài đặt toàn bộ"
     echo -e "  ${RED}0${NC} Thoát chương trình"
     echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
-    read -p " 👉 Nhập lựa chọn của bạn: " choice
+    read -p "Nhập lựa chọn của bạn: " choice
 
     case $choice in
         1) add_port ;;
