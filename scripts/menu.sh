@@ -112,7 +112,7 @@ while true; do
         2) delete_port ;;
         3) edit_config ;;
         4) check_traffic ;;
-        5) bash "$INSTALL_DIR/scripts/update.sh" ;;
+        5) exec bash "$INSTALL_DIR/scripts/update.sh" ;;
         6) systemctl restart realm && print_info "Đã khởi động lại Realm." ;;
         7) bash "$INSTALL_DIR/scripts/uninstall.sh" ; exit 0 ;;
         0) exit 0 ;;
