@@ -91,12 +91,12 @@ check_traffic() {
 }
 
 while true; do
-    echo -e "\n${BLUE}╔═════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "\n${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${BLUE}║${NC}              ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}              ${BLUE}║${NC}"
-    echo -e "${BLUE}╠═════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${BLUE}╠════════════════════════════════════════════════════════════╣${NC}"
     echo -e "  ${BLUE}Tác giả:${NC} Vietnamvpn | ${BLUE}Website:${NC} https://linksub24h.com"
     echo -e "  $(check_service_status)"
-    echo -e "${BLUE}╠═════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${BLUE}╠════════════════════════════════════════════════════════════╣${NC}"
     echo -e "  ${YELLOW}1${NC} Thêm cổng chuyển tiếp mới"
     echo -e "  ${YELLOW}2${NC} Xóa cổng chuyển tiếp hiện có"
     echo -e "  ${YELLOW}3${NC} Sửa file cấu hình thủ công"
@@ -105,7 +105,7 @@ while true; do
     echo -e "  ${YELLOW}6${NC} Khởi động lại dịch vụ Realm"
     echo -e "  ${YELLOW}7${NC} Gỡ cài đặt toàn bộ"
     echo -e "  ${RED}0${NC} Thoát chương trình"
-    echo -e "${BLUE}╚═════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
     read -p "Nhập lựa chọn của bạn: " choice
 
     case $choice in
