@@ -7,6 +7,7 @@ check_root
 
 print_info "Đang cập nhật mã nguồn quản lý từ GitHub..."
 cd "$INSTALL_DIR" || exit
+git reset --hard
 git pull origin main
 
 # Tự động cấp lại quyền thực thi
