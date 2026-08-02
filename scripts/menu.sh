@@ -18,6 +18,19 @@ add_port() {
         return
     fi
 
+    # Kiểm tra và mở cổng TCP/UDP nếu chưa mở
+    if command -v ufw >/dev/null 2>&1; then
+        ufw status | grep -q "$listen_port/tcp" || ufw allow "$listen_port"/tcp >/dev/null 2>&1
+        ufw status | grep -q "$listen_port/udp" || ufw allow "$listen_port"/udp >/dev/null 2>&1
+    elif command -v firewall-cmd >/dev/null 2>&1; then
+        firewall-cmd --zone=public --query-port="$listen_port"/tcp >/dev/null 2>&1 || firewall-cmd --zone=public --add-port="$listen_port"/tcp --permanent >/dev/null 2>&1
+        firewall-cmd --zone=public --query-port="$listen_port"/udp >/dev/null 2>&1 || firewall-cmd --zone=public --add-port="$listen_port"/udp --permanent >/dev/null 2>&1
+        firewall-cmd --reload >/dev/null 2>&1
+    else
+        iptables -C INPUT -p tcp --dport "$listen_port" -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp --dport "$listen_port" -j ACCEPT
+        iptables -C INPUT -p udp --dport "$listen_port" -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport "$listen_port" -j ACCEPT
+    fi
+
     echo "" >> "$CONFIG_FILE"
     echo "[[endpoints]]" >> "$CONFIG_FILE"
     echo "listen = \"0.0.0.0:$listen_port\"" >> "$CONFIG_FILE"
