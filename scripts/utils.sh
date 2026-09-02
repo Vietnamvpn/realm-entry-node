@@ -83,7 +83,7 @@ get_random_port() {
 }
 
 add_port() {
-    echo -e "\n${BLUE}===== THÊM CỔNG CHUYỂN TIẾP =====${NC}"
+    echo -e "\n${BLUE}==================== THÊM CỔNG CHUYỂN TIẾP ====================${NC}"
     echo -e "${YELLOW}Lưu ý: Nếu để trống cổng lắng nghe, hệ thống sẽ tự động chọn cổng ngẫu nhiên chưa sử dụng.${NC}"
     echo -e ""
     read -p "Nhập Cổng lắng nghe trên VPS hiện tại: " listen_port
@@ -114,7 +114,7 @@ add_port() {
 }
 
 delete_port() {
-    echo -e "\n${BLUE}===== XÓA CỔNG CHUYỂN TIẾP =====${NC}"
+    echo -e "\n${BLUE}==================== XÓA CỔNG CHUYỂN TIẾP ====================${NC}"
     
     mapfile -t listens < <(grep -E 'listen\s*=' "$CONFIG_FILE" | sed -E 's/.*listen\s*=\s*"([^"]+)".*/\1/')
     mapfile -t remotes < <(grep -E 'remote\s*=' "$CONFIG_FILE" | sed -E 's/.*remote\s*=\s*"([^"]+)".*/\1/')
@@ -165,7 +165,7 @@ delete_port() {
 }
 
 edit_config() {
-    echo -e "\n${BLUE}===== SỬA CỔNG CHUYỂN TIẾP =====${NC}"
+    echo -e "\n${BLUE}==================== SỬA CỔNG CHUYỂN TIẾP ====================${NC}"
 
     mapfile -t listens < <(grep -E 'listen\s*=' "$CONFIG_FILE" | sed -E 's/.*listen\s*=\s*"([^"]+)".*/\1/')
     mapfile -t remotes < <(grep -E 'remote\s*=' "$CONFIG_FILE" | sed -E 's/.*remote\s*=\s*"([^"]+)".*/\1/')
@@ -229,7 +229,7 @@ edit_config() {
 }
 
 check_traffic() {
-    echo -e "\n${BLUE}===== KIỂM TRA LƯU LƯỢNG KẾT NỐI =====${NC}"
+    echo -e "\n${BLUE}==================== KIỂM TRA LƯU LƯỢNG KẾT NỐI ====================${NC}"
     read -p "Nhập Cổng cần kiểm tra: " check_port
 
     if [[ -z "$check_port" ]]; then
