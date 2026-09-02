@@ -32,8 +32,7 @@ main() {
     systemctl start realm
     print_info "Cập nhật mã nguồn và lõi Realm hoàn tất!"
 
-    # Tự động nạp lại giao diện menu mới sau khi cập nhật xong
-    exec bash "$INSTALL_DIR/scripts/menu.sh"
+    exit 0
 }
 
 # Gọi hàm main để toàn bộ tiến trình chạy trên RAM
