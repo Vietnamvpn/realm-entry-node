@@ -24,10 +24,10 @@ while true; do
     echo -e "  ${BLUE}Tác giả:${NC} Vietnamvpn  | ${BLUE}Phiên bản Core:${NC} ${GREEN}${DISPLAY_VER}${NC}"
     echo -e "  $(check_service_status) | ${BLUE}Website:${NC} https://linksub24h.com"
     echo -e "${BLUE}╠════════════════════════════════════════════════════════════╣${NC}"
-    echo -e "  ${YELLOW}1${NC} Thêm cổng chuyển tiếp mới | ${GREEN}5${NC} Cập nhật hệ thống"
-    echo -e "  ${YELLOW}2${NC} Xóa cổng chuyển tiếp hiện có | ${YELLOW}6${NC} Khởi động lại dịch vụ Realm"
-    echo -e "  ${YELLOW}3${NC} Sửa cổng chuyển tiếp hiện có | ${YELLOW}7${NC} Gỡ cài đặt toàn bộ"
-    echo -e "  ${YELLOW}4${NC} Kiểm tra App có đi qua VPS | ${RED}0${NC} Thoát chương trình"
+    echo -e "  ${YELLOW}1.${NC} Thêm cổng chuyển tiếp mới    | ${GREEN}5.${NC} Cập nhật hệ thống"
+    echo -e "  ${YELLOW}2.${NC} Xóa cổng chuyển tiếp hiện có | ${YELLOW}6.${NC} Khởi động lại dịch vụ Realm"
+    echo -e "  ${YELLOW}3.${NC} Sửa cổng chuyển tiếp hiện có | ${YELLOW}7.${NC} Gỡ cài đặt toàn bộ"
+    echo -e "  ${YELLOW}4.${NC} Kiểm tra App có đi qua VPS   | ${RED}0.${NC} Thoát chương trình"
     echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
     read -p "Nhập lựa chọn của bạn: " choice
 
