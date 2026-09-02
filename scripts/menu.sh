@@ -6,6 +6,7 @@ source "$INSTALL_DIR/scripts/utils.sh"
 check_root
 
 while true; do
+clear
     REALM_VER=$(/usr/local/bin/realm -V 2>&1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n1)
     if [[ -z "$REALM_VER" ]]; then
         REALM_VER=$(/usr/local/bin/realm --version 2>&1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n1)
