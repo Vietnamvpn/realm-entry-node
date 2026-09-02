@@ -28,7 +28,7 @@ while true; do
     echo -e "  ${YELLOW}2${NC} Xóa cổng chuyển tiếp hiện có"
     echo -e "  ${YELLOW}3${NC} Sửa cổng chuyển tiếp hiện có"
     echo -e "  ${YELLOW}4${NC} Kiểm tra App có đi qua VPS"
-    echo -e "  ${YELLOW}5${NC} Cập nhật hệ thống"
+    echo -e "  ${GREEN}5${NC} Cập nhật hệ thống"
     echo -e "  ${YELLOW}6${NC} Khởi động lại dịch vụ Realm"
     echo -e "  ${YELLOW}7${NC} Gỡ cài đặt toàn bộ"
     echo -e "  ${RED}0${NC} Thoát chương trình"
