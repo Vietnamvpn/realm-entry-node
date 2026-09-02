@@ -87,13 +87,14 @@ add_port() {
     echo -e "${YELLOW}Lưu ý: Nếu để trống cổng lắng nghe, hệ thống sẽ tự động chọn cổng ngẫu nhiên chưa sử dụng.${NC}"
     echo -e ""
     read -p "Nhập Cổng lắng nghe trên VPS hiện tại: " listen_port
-    read -p "Nhập IP Node Gốc: " remote_ip
-    read -p "Nhập Cổng Node Gốc: " remote_port
 
     if [[ -z "$listen_port" ]]; then
         listen_port=$(get_random_port)
         print_info "Đã tự động chọn cổng ngẫu nhiên chưa sử dụng: $listen_port"
     fi
+
+    read -p "Nhập IP Node Gốc: " remote_ip
+    read -p "Nhập Cổng Node Gốc: " remote_port
 
     if [[ -z "$remote_ip" || -z "$remote_port" ]]; then
         print_error "IP và Cổng Node Gốc không được để trống."
