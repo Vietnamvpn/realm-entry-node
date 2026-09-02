@@ -289,19 +289,38 @@ edit_config() {
 
 check_traffic() {
     echo -e "\n${BLUE}==================== KIỂM TRA LƯU LƯỢNG KẾT NỐI ====================${NC}"
-    read -p "Nhập Cổng cần kiểm tra (Nhập 0 để hủy): " check_port
 
-    if [[ "$check_port" == "0" ]]; then
+    mapfile -t listens < <(grep -E 'listen\s*=' "$CONFIG_FILE" | sed -E 's/.*listen\s*=\s*"([^"]+)".*/\1/')
+    mapfile -t remotes < <(grep -E 'remote\s*=' "$CONFIG_FILE" | sed -E 's/.*remote\s*=\s*"([^"]+)".*/\1/')
+
+    if [ ${#listens[@]} -eq 0 ]; then
+        print_error "Chưa có cổng chuyển tiếp nào trong cấu hình."
+        pause
+        return
+    fi
+
+    echo -e "${CYAN}Danh sách cổng chuyển tiếp hiện tại:${NC}"
+    for i in "${!listens[@]}"; do
+        echo -e "  ${YELLOW}$((i+1))${NC}. Cổng lắng nghe: ${GREEN}${listens[$i]}${NC} -> Gốc: ${GREEN}${remotes[$i]}${NC}"
+    done
+
+    read -p "Chọn số thứ tự cổng cần kiểm tra (Nhập 0 để hủy): " choice_num
+
+    if [[ "$choice_num" == "0" ]]; then
         print_info "Đã hủy thao tác."
         pause
         return
     fi
 
-    if [[ -z "$check_port" ]]; then
-        print_error "Cổng không được để trống."
+    if ! [[ "$choice_num" =~ ^[0-9]+$ ]] || [ "$choice_num" -lt 1 ] || [ "$choice_num" -gt "${#listens[@]}" ]; then
+        print_error "Lựa chọn không hợp lệ."
         pause
         return
     fi
+
+    idx=$((choice_num - 1))
+    target_listen="${listens[$idx]}"
+    check_port=$(echo "$target_listen" | sed 's/.*://')
 
     echo -e "\n${YELLOW}[+] Đang kiểm tra kết nối TCP (VLESS/Trojan/Shadowsocks...):${NC}"
     TCP_RESULT=$(ss -tunp | grep ":$check_port ")
