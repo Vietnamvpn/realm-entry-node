@@ -84,17 +84,34 @@ get_random_port() {
 
 add_port() {
     echo -e "\n${BLUE}==================== THÊM CỔNG CHUYỂN TIẾP ====================${NC}"
-    echo -e "${YELLOW}Lưu ý: Nếu để trống cổng lắng nghe, hệ thống sẽ tự động chọn cổng ngẫu nhiên chưa sử dụng.${NC}"
+    echo -e "${YELLOW}Lưu ý: Để trống cổng lắng nghe sẽ tự động chọn cổng ngẫu nhiên. Nhập 0 để hủy.${NC}"
     echo -e ""
-    read -p "Nhập Cổng lắng nghe trên VPS hiện tại: " listen_port
+    read -p "Nhập Cổng lắng nghe trên VPS hiện tại (Nhập 0 để hủy): " listen_port
+
+    if [[ "$listen_port" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
 
     if [[ -z "$listen_port" ]]; then
         listen_port=$(get_random_port)
         print_info "Đã tự động chọn cổng ngẫu nhiên chưa sử dụng: $listen_port"
     fi
 
-    read -p "Nhập IP Node Gốc: " remote_ip
-    read -p "Nhập Cổng Node Gốc: " remote_port
+    read -p "Nhập IP Node Gốc (Nhập 0 để hủy): " remote_ip
+    if [[ "$remote_ip" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
+
+    read -p "Nhập Cổng Node Gốc (Nhập 0 để hủy): " remote_port
+    if [[ "$remote_port" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
 
     if [[ -z "$remote_ip" || -z "$remote_port" ]]; then
         print_error "IP và Cổng Node Gốc không được để trống."
@@ -131,7 +148,25 @@ delete_port() {
         echo -e "  ${YELLOW}$((i+1))${NC}. Cổng lắng nghe: ${GREEN}${listens[$i]}${NC} -> Gốc: ${GREEN}${remotes[$i]}${NC}"
     done
 
-    read -p "Chọn số thứ tự cổng cần xóa (1-${#listens[@]}): " choice_num
+    read -p "Chọn số thứ tự cổng cần xóa (Để trống để xóa tất cả, nhập 0 để hủy): " choice_num
+
+    if [[ "$choice_num" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
+
+    if [[ -z "$choice_num" ]]; then
+        for item in "${listens[@]}"; do
+            listen_port=$(echo "$item" | sed 's/.*://')
+            close_port "$listen_port"
+        done
+        > "$CONFIG_FILE"
+        systemctl restart realm
+        print_info "Đã xóa toàn bộ cổng chuyển tiếp."
+        pause
+        return
+    fi
 
     if ! [[ "$choice_num" =~ ^[0-9]+$ ]] || [ "$choice_num" -lt 1 ] || [ "$choice_num" -gt "${#listens[@]}" ]; then
         print_error "Lựa chọn không hợp lệ."
@@ -182,7 +217,13 @@ edit_config() {
         echo -e "  ${YELLOW}$((i+1))${NC}. Cổng lắng nghe: ${GREEN}${listens[$i]}${NC} -> Gốc: ${GREEN}${remotes[$i]}${NC}"
     done
 
-    read -p "Chọn số thứ tự cổng cần sửa (1-${#listens[@]}): " choice_num
+    read -p "Chọn số thứ tự cổng cần sửa (Nhập 0 để hủy): " choice_num
+
+    if [[ "$choice_num" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
 
     if ! [[ "$choice_num" =~ ^[0-9]+$ ]] || [ "$choice_num" -lt 1 ] || [ "$choice_num" -gt "${#listens[@]}" ]; then
         print_error "Lựa chọn không hợp lệ."
@@ -206,9 +247,26 @@ edit_config() {
     old_remote_ip=$(echo "$old_remote" | cut -d: -f1)
     old_remote_port=$(echo "$old_remote" | cut -d: -f2)
 
-    read -p "Cổng lắng nghe mới (Mặc định: $old_port): " new_listen_port
-    read -p "IP Node Gốc mới (Mặc định: $old_remote_ip): " new_remote_ip
-    read -p "Cổng Node Gốc mới (Mặc định: $old_remote_port): " new_remote_port
+    read -p "Cổng lắng nghe mới (Mặc định: $old_port, Nhập 0 để hủy): " new_listen_port
+    if [[ "$new_listen_port" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
+
+    read -p "IP Node Gốc mới (Mặc định: $old_remote_ip, Nhập 0 để hủy): " new_remote_ip
+    if [[ "$new_remote_ip" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
+
+    read -p "Cổng Node Gốc mới (Mặc định: $old_remote_port, Nhập 0 để hủy): " new_remote_port
+    if [[ "$new_remote_port" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
 
     new_listen_port=${new_listen_port:-$old_port}
     new_remote_ip=${new_remote_ip:-$old_remote_ip}
@@ -231,7 +289,13 @@ edit_config() {
 
 check_traffic() {
     echo -e "\n${BLUE}==================== KIỂM TRA LƯU LƯỢNG KẾT NỐI ====================${NC}"
-    read -p "Nhập Cổng cần kiểm tra: " check_port
+    read -p "Nhập Cổng cần kiểm tra (Nhập 0 để hủy): " check_port
+
+    if [[ "$check_port" == "0" ]]; then
+        print_info "Đã hủy thao tác."
+        pause
+        return
+    fi
 
     if [[ -z "$check_port" ]]; then
         print_error "Cổng không được để trống."
