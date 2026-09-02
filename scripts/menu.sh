@@ -199,14 +199,22 @@ check_traffic() {
 }
 
 while true; do
-    REALM_VER=$(/usr/local/bin/realm -V 2>/dev/null | awk '{print $NF}')
-    REALM_VER=${REALM_VER:-"Không xác định"}
+    REALM_VER=$(/usr/local/bin/realm -V 2>&1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n1)
+    if [[ -z "$REALM_VER" ]]; then
+        REALM_VER=$(/usr/local/bin/realm --version 2>&1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -n1)
+    fi
+
+    if [[ -n "$REALM_VER" ]]; then
+        DISPLAY_VER="v$REALM_VER"
+    else
+        DISPLAY_VER="Không xác định"
+    fi
 
     echo -e "\n${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${BLUE}║${NC}              ${GREEN}BẢNG ĐIỀU KHIỂN REALM ENTRY NODE${NC}              ${BLUE}║${NC}"
     echo -e "${BLUE}╠════════════════════════════════════════════════════════════╣${NC}"
     echo -e "  ${BLUE}Tác giả:${NC} Vietnamvpn | ${BLUE}Website:${NC} https://linksub24h.com"
-    echo -e "  ${BLUE}Phiên bản Core:${NC} ${GREEN}v${REALM_VER}${NC}"
+    echo -e "  ${BLUE}Phiên bản Core:${NC} ${GREEN}${DISPLAY_VER}${NC}"
     echo -e "  $(check_service_status)"
     echo -e "${BLUE}╠════════════════════════════════════════════════════════════╣${NC}"
     echo -e "  ${YELLOW}1${NC} Thêm cổng chuyển tiếp mới"
