@@ -7,6 +7,11 @@ CONFIG_FILE="/etc/realm/config.toml"
 
 check_root
 
+pause() {
+    echo ""
+    read -p "Nhấn Enter để quay lại menu..."
+}
+
 open_port() {
     local port="$1"
     if command -v ufw >/dev/null 2>&1; then
@@ -45,6 +50,7 @@ add_port() {
 
     if [[ -z "$listen_port" || -z "$remote_ip" || -z "$remote_port" ]]; then
         print_error "Thông tin không được để trống."
+        pause
         return
     fi
 
@@ -57,6 +63,7 @@ add_port() {
 
     systemctl restart realm
     print_info "Đã thêm thành công! Cổng $listen_port đang chuyển tới $remote_ip:$remote_port."
+    pause
 }
 
 delete_port() {
@@ -67,6 +74,7 @@ delete_port() {
 
     if [ ${#listens[@]} -eq 0 ]; then
         print_error "Chưa có cổng chuyển tiếp nào trong cấu hình."
+        pause
         return
     fi
 
@@ -79,6 +87,7 @@ delete_port() {
 
     if ! [[ "$choice_num" =~ ^[0-9]+$ ]] || [ "$choice_num" -lt 1 ] || [ "$choice_num" -gt "${#listens[@]}" ]; then
         print_error "Lựa chọn không hợp lệ."
+        pause
         return
     fi
 
@@ -90,6 +99,7 @@ delete_port() {
 
     if [ -z "$LINE_NUM" ]; then
         print_error "Không tìm thấy cấu hình trong file."
+        pause
         return
     fi
 
@@ -104,6 +114,7 @@ delete_port() {
 
     systemctl restart realm
     print_info "Đã xóa hoàn toàn chuyển tiếp và đóng cổng $listen_port."
+    pause
 }
 
 edit_config() {
@@ -114,6 +125,7 @@ edit_config() {
 
     if [ ${#listens[@]} -eq 0 ]; then
         print_error "Chưa có cổng chuyển tiếp nào trong cấu hình."
+        pause
         return
     fi
 
@@ -126,6 +138,7 @@ edit_config() {
 
     if ! [[ "$choice_num" =~ ^[0-9]+$ ]] || [ "$choice_num" -lt 1 ] || [ "$choice_num" -gt "${#listens[@]}" ]; then
         print_error "Lựa chọn không hợp lệ."
+        pause
         return
     fi
 
@@ -138,6 +151,7 @@ edit_config() {
 
     if [ -z "$LINE_NUM" ]; then
         print_error "Không tìm thấy cấu hình trong file."
+        pause
         return
     fi
 
@@ -164,6 +178,7 @@ edit_config() {
 
     systemctl restart realm
     print_info "Đã cập nhật thành công cổng $new_listen_port -> $new_remote_ip:$new_remote_port."
+    pause
 }
 
 check_traffic() {
@@ -172,6 +187,7 @@ check_traffic() {
 
     if [[ -z "$check_port" ]]; then
         print_error "Cổng không được để trống."
+        pause
         return
     fi
 
@@ -196,6 +212,7 @@ check_traffic() {
     else
         echo -e "${GREEN}-> Đã bắt được dữ liệu UDP thành công.${NC}"
     fi
+    pause
 }
 
 while true; do
@@ -234,9 +251,9 @@ while true; do
         3) edit_config ;;
         4) check_traffic ;;
         5) exec bash "$INSTALL_DIR/scripts/update.sh" ;;
-        6) systemctl restart realm && print_info "Đã khởi động lại Realm." ;;
+        6) systemctl restart realm && print_info "Đã khởi động lại Realm." && pause ;;
         7) bash "$INSTALL_DIR/scripts/uninstall.sh" ; exit 0 ;;
         0) exit 0 ;;
-        *) print_error "Lựa chọn không hợp lệ." ;;
+        *) print_error "Lựa chọn không hợp lệ." && pause ;;
     esac
 done
