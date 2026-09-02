@@ -7,6 +7,36 @@ CONFIG_FILE="/etc/realm/config.toml"
 
 check_root
 
+open_port() {
+    local port="$1"
+    if command -v ufw >/dev/null 2>&1; then
+        ufw status | grep -q "$port/tcp" || ufw allow "$port"/tcp >/dev/null 2>&1
+        ufw status | grep -q "$port/udp" || ufw allow "$port"/udp >/dev/null 2>&1
+    elif command -v firewall-cmd >/dev/null 2>&1; then
+        firewall-cmd --zone=public --query-port="$port"/tcp >/dev/null 2>&1 || firewall-cmd --zone=public --add-port="$port"/tcp --permanent >/dev/null 2>&1
+        firewall-cmd --zone=public --query-port="$port"/udp >/dev/null 2>&1 || firewall-cmd --zone=public --add-port="$port"/udp --permanent >/dev/null 2>&1
+        firewall-cmd --reload >/dev/null 2>&1
+    else
+        iptables -C INPUT -p tcp --dport "$port" -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp --dport "$port" -j ACCEPT
+        iptables -C INPUT -p udp --dport "$port" -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport "$port" -j ACCEPT
+    fi
+}
+
+close_port() {
+    local port="$1"
+    if command -v ufw >/dev/null 2>&1; then
+        ufw delete allow "$port"/tcp >/dev/null 2>&1
+        ufw delete allow "$port"/udp >/dev/null 2>&1
+    elif command -v firewall-cmd >/dev/null 2>&1; then
+        firewall-cmd --zone=public --remove-port="$port"/tcp --permanent >/dev/null 2>&1
+        firewall-cmd --zone=public --remove-port="$port"/udp --permanent >/dev/null 2>&1
+        firewall-cmd --reload >/dev/null 2>&1
+    else
+        iptables -D INPUT -p tcp --dport "$port" -j ACCEPT 2>/dev/null
+        iptables -D INPUT -p udp --dport "$port" -j ACCEPT 2>/dev/null
+    fi
+}
+
 add_port() {
     echo -e "\n${BLUE}===== THÊM CỔNG CHUYỂN TIẾP =====${NC}"
     read -p "Nhập Cổng lắng nghe trên VPS hiện tại: " listen_port
@@ -18,18 +48,7 @@ add_port() {
         return
     fi
 
-    # Kiểm tra và mở cổng TCP/UDP nếu chưa mở
-    if command -v ufw >/dev/null 2>&1; then
-        ufw status | grep -q "$listen_port/tcp" || ufw allow "$listen_port"/tcp >/dev/null 2>&1
-        ufw status | grep -q "$listen_port/udp" || ufw allow "$listen_port"/udp >/dev/null 2>&1
-    elif command -v firewall-cmd >/dev/null 2>&1; then
-        firewall-cmd --zone=public --query-port="$listen_port"/tcp >/dev/null 2>&1 || firewall-cmd --zone=public --add-port="$listen_port"/tcp --permanent >/dev/null 2>&1
-        firewall-cmd --zone=public --query-port="$listen_port"/udp >/dev/null 2>&1 || firewall-cmd --zone=public --add-port="$listen_port"/udp --permanent >/dev/null 2>&1
-        firewall-cmd --reload >/dev/null 2>&1
-    else
-        iptables -C INPUT -p tcp --dport "$listen_port" -j ACCEPT 2>/dev/null || iptables -I INPUT -p tcp --dport "$listen_port" -j ACCEPT
-        iptables -C INPUT -p udp --dport "$listen_port" -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport "$listen_port" -j ACCEPT
-    fi
+    open_port "$listen_port"
 
     echo "" >> "$CONFIG_FILE"
     echo "[[endpoints]]" >> "$CONFIG_FILE"
@@ -42,33 +61,109 @@ add_port() {
 
 delete_port() {
     echo -e "\n${BLUE}===== XÓA CỔNG CHUYỂN TIẾP =====${NC}"
-    read -p "Nhập Cổng cần xóa (VD: 8080): " listen_port
+    
+    mapfile -t listens < <(grep -E 'listen\s*=' "$CONFIG_FILE" | sed -E 's/.*listen\s*=\s*"([^"]+)".*/\1/')
+    mapfile -t remotes < <(grep -E 'remote\s*=' "$CONFIG_FILE" | sed -E 's/.*remote\s*=\s*"([^"]+)".*/\1/')
 
-    if [[ -z "$listen_port" ]]; then
-        print_error "Cổng không hợp lệ."
+    if [ ${#listens[@]} -eq 0 ]; then
+        print_error "Chưa có cổng chuyển tiếp nào trong cấu hình."
         return
     fi
 
-    LINE_NUM=$(grep -n "listen = \"0.0.0.0:$listen_port\"" "$CONFIG_FILE" | cut -d: -f1)
-    
+    echo -e "${CYAN}Danh sách cổng chuyển tiếp hiện tại:${NC}"
+    for i in "${!listens[@]}"; do
+        echo -e "  ${YELLOW}$((i+1))${NC}. Cổng lắng nghe: ${GREEN}${listens[$i]}${NC} -> Gốc: ${GREEN}${remotes[$i]}${NC}"
+    done
+
+    read -p "Chọn số thứ tự cổng cần xóa (1-${#listens[@]}): " choice_num
+
+    if ! [[ "$choice_num" =~ ^[0-9]+$ ]] || [ "$choice_num" -lt 1 ] || [ "$choice_num" -gt "${#listens[@]}" ]; then
+        print_error "Lựa chọn không hợp lệ."
+        return
+    fi
+
+    idx=$((choice_num - 1))
+    target_listen="${listens[$idx]}"
+    listen_port=$(echo "$target_listen" | sed 's/.*://')
+
+    LINE_NUM=$(grep -n -F "listen = \"$target_listen\"" "$CONFIG_FILE" | head -n1 | cut -d: -f1)
+
     if [ -z "$LINE_NUM" ]; then
-        print_error "Không tìm thấy cấu hình cho cổng $listen_port."
+        print_error "Không tìm thấy cấu hình trong file."
         return
     fi
 
-    START_LINE=$((LINE_NUM - 2))
+    START_LINE=$(sed -n "1,${LINE_NUM}p" "$CONFIG_FILE" | grep -n "\[\[endpoints\]\]" | tail -n1 | cut -d: -f1)
     END_LINE=$((LINE_NUM + 1))
-    
-    sed -i "${START_LINE},${END_LINE}d" "$CONFIG_FILE"
-    
+
+    if [ -n "$START_LINE" ]; then
+        sed -i "${START_LINE},${END_LINE}d" "$CONFIG_FILE"
+    fi
+
+    close_port "$listen_port"
+
     systemctl restart realm
-    print_info "Đã xóa hoàn toàn chuyển tiếp cho cổng $listen_port."
+    print_info "Đã xóa hoàn toàn chuyển tiếp và đóng cổng $listen_port."
 }
 
 edit_config() {
-    nano "$CONFIG_FILE"
+    echo -e "\n${BLUE}===== SỬA CỔNG CHUYỂN TIẾP =====${NC}"
+
+    mapfile -t listens < <(grep -E 'listen\s*=' "$CONFIG_FILE" | sed -E 's/.*listen\s*=\s*"([^"]+)".*/\1/')
+    mapfile -t remotes < <(grep -E 'remote\s*=' "$CONFIG_FILE" | sed -E 's/.*remote\s*=\s*"([^"]+)".*/\1/')
+
+    if [ ${#listens[@]} -eq 0 ]; then
+        print_error "Chưa có cổng chuyển tiếp nào trong cấu hình."
+        return
+    fi
+
+    echo -e "${CYAN}Danh sách cổng chuyển tiếp hiện tại:${NC}"
+    for i in "${!listens[@]}"; do
+        echo -e "  ${YELLOW}$((i+1))${NC}. Cổng lắng nghe: ${GREEN}${listens[$i]}${NC} -> Gốc: ${GREEN}${remotes[$i]}${NC}"
+    done
+
+    read -p "Chọn số thứ tự cổng cần sửa (1-${#listens[@]}): " choice_num
+
+    if ! [[ "$choice_num" =~ ^[0-9]+$ ]] || [ "$choice_num" -lt 1 ] || [ "$choice_num" -gt "${#listens[@]}" ]; then
+        print_error "Lựa chọn không hợp lệ."
+        return
+    fi
+
+    idx=$((choice_num - 1))
+    old_listen="${listens[$idx]}"
+    old_remote="${remotes[$idx]}"
+    old_port=$(echo "$old_listen" | sed 's/.*://')
+
+    LINE_NUM=$(grep -n -F "listen = \"$old_listen\"" "$CONFIG_FILE" | head -n1 | cut -d: -f1)
+
+    if [ -z "$LINE_NUM" ]; then
+        print_error "Không tìm thấy cấu hình trong file."
+        return
+    fi
+
+    old_remote_ip=$(echo "$old_remote" | cut -d: -f1)
+    old_remote_port=$(echo "$old_remote" | cut -d: -f2)
+
+    read -p "Cổng lắng nghe mới (Mặc định: $old_port): " new_listen_port
+    read -p "IP Node Gốc mới (Mặc định: $old_remote_ip): " new_remote_ip
+    read -p "Cổng Node Gốc mới (Mặc định: $old_remote_port): " new_remote_port
+
+    new_listen_port=${new_listen_port:-$old_port}
+    new_remote_ip=${new_remote_ip:-$old_remote_ip}
+    new_remote_port=${new_remote_port:-$old_remote_port}
+
+    if [ "$old_port" != "$new_listen_port" ]; then
+        close_port "$old_port"
+        open_port "$new_listen_port"
+    else
+        open_port "$new_listen_port"
+    fi
+
+    sed -i "${LINE_NUM}s|.*|listen = \"0.0.0.0:$new_listen_port\"|" "$CONFIG_FILE"
+    sed -i "$((LINE_NUM + 1))s|.*|remote = \"$new_remote_ip:$new_remote_port\"|" "$CONFIG_FILE"
+
     systemctl restart realm
-    print_info "Đã áp dụng thay đổi và khởi động lại Realm."
+    print_info "Đã cập nhật thành công cổng $new_listen_port -> $new_remote_ip:$new_remote_port."
 }
 
 check_traffic() {
@@ -112,7 +207,7 @@ while true; do
     echo -e "${BLUE}╠════════════════════════════════════════════════════════════╣${NC}"
     echo -e "  ${YELLOW}1${NC} Thêm cổng chuyển tiếp mới"
     echo -e "  ${YELLOW}2${NC} Xóa cổng chuyển tiếp hiện có"
-    echo -e "  ${YELLOW}3${NC} Sửa file cấu hình thủ công"
+    echo -e "  ${YELLOW}3${NC} Sửa cổng chuyển tiếp hiện có"
     echo -e "  ${YELLOW}4${NC} Kiểm tra App có đi qua VPS"
     echo -e "  ${YELLOW}5${NC} Cập nhật hệ thống"
     echo -e "  ${YELLOW}6${NC} Khởi động lại dịch vụ Realm"

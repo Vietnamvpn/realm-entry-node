@@ -15,8 +15,60 @@ fi
 
 echo -e "${GREEN}[THÔNG BÁO] Bắt đầu cài đặt hệ thống Realm...${NC}"
 
-apt-get update -y -q
-apt-get install -y -q git curl wget tar
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+else
+    OS="unknown"
+fi
+
+echo -e "${GREEN}[THÔNG BÁO] Kiểm tra hệ điều hành ($OS) và cài đặt tường lửa...${NC}"
+
+case "$OS" in
+    ubuntu|debian)
+        apt-get update -y -q
+        apt-get install -y -q git curl wget tar ufw
+        systemctl enable ufw
+        systemctl start ufw
+        ufw allow 22/tcp
+        ufw --force enable
+        ;;
+    centos|rhel|almalinux|rocky|fedora)
+        if command -v dnf >/dev/null 2>&1; then
+            PKG_MAN="dnf"
+        else
+            PKG_MAN="yum"
+        fi
+        $PKG_MAN update -y -q
+        $PKG_MAN install -y -q git curl wget tar firewalld
+        systemctl enable firewalld
+        systemctl start firewalld
+        firewall-cmd --permanent --add-service=ssh
+        firewall-cmd --reload
+        ;;
+    *)
+        if command -v apt-get >/dev/null 2>&1; then
+            apt-get update -y -q
+            apt-get install -y -q git curl wget tar ufw
+            systemctl enable ufw
+            systemctl start ufw
+            ufw allow 22/tcp
+            ufw --force enable
+        elif command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1; then
+            PKG_MAN="yum"
+            command -v dnf >/dev/null 2>&1 && PKG_MAN="dnf"
+            $PKG_MAN update -y -q
+            $PKG_MAN install -y -q git curl wget tar firewalld
+            systemctl enable firewalld
+            systemctl start firewalld
+            firewall-cmd --permanent --add-service=ssh
+            firewall-cmd --reload
+        else
+            echo -e "${RED}[LỖI] Hệ điều hành không hỗ trợ tự động cài tường lửa.${NC}"
+            exit 1
+        fi
+        ;;
+esac
 
 if [ -d "$INSTALL_DIR" ]; then
     rm -rf "$INSTALL_DIR"
