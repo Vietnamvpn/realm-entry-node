@@ -71,14 +71,32 @@ close_port() {
     fi
 }
 
+get_random_port() {
+    local port
+    while true; do
+        port=$((RANDOM % 4001 + 2000))
+        if ! ss -tuln | grep -q ":$port " && ! grep -q "0.0.0.0:$port" "$CONFIG_FILE"; then
+            echo "$port"
+            return 0
+        fi
+    done
+}
+
 add_port() {
-    echo -e "\n${BLUE}===== THÊM CỔNG CHUYỂN TIẾP =====${NC}"
+    echo -e "${BLUE}===== THÊM CỔNG CHUYỂN TIẾP =====${NC}"
+    echo -e "${YELLOW}Lưu ý: Nếu để trống cổng lắng nghe, hệ thống sẽ tự động chọn cổng ngẫu nhiên chưa sử dụng.${NC}"
+    echo -e ""
     read -p "Nhập Cổng lắng nghe trên VPS hiện tại: " listen_port
     read -p "Nhập IP Node Gốc: " remote_ip
     read -p "Nhập Cổng Node Gốc: " remote_port
 
-    if [[ -z "$listen_port" || -z "$remote_ip" || -z "$remote_port" ]]; then
-        print_error "Thông tin không được để trống."
+    if [[ -z "$listen_port" ]]; then
+        listen_port=$(get_random_port)
+        print_info "Đã tự động chọn cổng ngẫu nhiên chưa sử dụng: $listen_port"
+    fi
+
+    if [[ -z "$remote_ip" || -z "$remote_port" ]]; then
+        print_error "IP và Cổng Node Gốc không được để trống."
         pause
         return
     fi
