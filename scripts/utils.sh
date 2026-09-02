@@ -83,7 +83,7 @@ get_random_port() {
 }
 
 add_port() {
-    echo -e "${BLUE}===== THÊM CỔNG CHUYỂN TIẾP =====${NC}"
+    echo -e "\n${BLUE}===== THÊM CỔNG CHUYỂN TIẾP =====${NC}"
     echo -e "${YELLOW}Lưu ý: Nếu để trống cổng lắng nghe, hệ thống sẽ tự động chọn cổng ngẫu nhiên chưa sử dụng.${NC}"
     echo -e ""
     read -p "Nhập Cổng lắng nghe trên VPS hiện tại: " listen_port
