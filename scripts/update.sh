@@ -18,7 +18,7 @@ main() {
     chmod +x /usr/local/bin/vvc
 
     print_info "Đang cập nhật lõi Realm lên bản mới nhất..."
-    REALM_URL="https://github.com/zhboner/realm/releases/latest/download/realm-x86_64-unknown-linux-gnu.tar.gz"
+    REALM_URL="https://github.com/zhboner/realm/releases/latest/download/realm-x86_64-unknown-linux-musl.tar.gz"
 
     systemctl stop realm
 
