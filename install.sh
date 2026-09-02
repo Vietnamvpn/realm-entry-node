@@ -75,7 +75,7 @@ if [ -d "$INSTALL_DIR" ]; then
 fi
 git clone "$REPO_URL" "$INSTALL_DIR" -q
 
-REALM_URL="https://github.com/zhboner/realm/releases/latest/download/realm-x86_64-unknown-linux-gnu.tar.gz"
+REALM_URL="https://github.com/zhboner/realm/releases/latest/download/realm-x86_64-unknown-linux-musl.tar.gz"
 cd /tmp || exit
 wget -qO realm.tar.gz "$REALM_URL"
 tar -xvf realm.tar.gz
