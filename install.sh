@@ -22,16 +22,29 @@ else
     OS="unknown"
 fi
 
-echo -e "${GREEN}[THÔNG BÁO] Kiểm tra hệ điều hành ($OS) và cài đặt tường lửa...${NC}"
+PUBLIC_IP=$(curl -s --max-time 5 https://api.ipify.org || curl -s --max-time 5 https://ifconfig.me)
+LOCAL_IP=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'src \K\S+')
+
+IS_NAT=false
+if [ -n "$PUBLIC_IP" ] && [ -n "$LOCAL_IP" ] && [ "$PUBLIC_IP" != "$LOCAL_IP" ]; then
+    IS_NAT=true
+    echo -e "${CYAN}[THÔNG BÁO] Phát hiện hệ thống là NAT VPS. Bỏ qua bước cài đặt tường lửa.${NC}"
+else
+    echo -e "${GREEN}[THÔNG BÁO] Kiểm tra hệ điều hành ($OS) và cài đặt tường lửa...${NC}"
+fi
 
 case "$OS" in
     ubuntu|debian)
         apt-get update -y -q
-        apt-get install -y -q git curl wget tar ufw
-        systemctl enable ufw
-        systemctl start ufw
-        ufw allow 22/tcp
-        ufw --force enable
+        if [ "$IS_NAT" = true ]; then
+            apt-get install -y -q git curl wget tar
+        else
+            apt-get install -y -q git curl wget tar ufw
+            systemctl enable ufw
+            systemctl start ufw
+            ufw allow 22/tcp
+            ufw --force enable
+        fi
         ;;
     centos|rhel|almalinux|rocky|fedora)
         if command -v dnf >/dev/null 2>&1; then
@@ -40,32 +53,46 @@ case "$OS" in
             PKG_MAN="yum"
         fi
         $PKG_MAN update -y -q
-        $PKG_MAN install -y -q git curl wget tar firewalld
-        systemctl enable firewalld
-        systemctl start firewalld
-        firewall-cmd --permanent --add-service=ssh
-        firewall-cmd --reload
-        ;;
-    *)
-        if command -v apt-get >/dev/null 2>&1; then
-            apt-get update -y -q
-            apt-get install -y -q git curl wget tar ufw
-            systemctl enable ufw
-            systemctl start ufw
-            ufw allow 22/tcp
-            ufw --force enable
-        elif command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1; then
-            PKG_MAN="yum"
-            command -v dnf >/dev/null 2>&1 && PKG_MAN="dnf"
-            $PKG_MAN update -y -q
+        if [ "$IS_NAT" = true ]; then
+            $PKG_MAN install -y -q git curl wget tar
+        else
             $PKG_MAN install -y -q git curl wget tar firewalld
             systemctl enable firewalld
             systemctl start firewalld
             firewall-cmd --permanent --add-service=ssh
             firewall-cmd --reload
+        fi
+        ;;
+    *)
+        if command -v apt-get >/dev/null 2>&1; then
+            apt-get update -y -q
+            if [ "$IS_NAT" = true ]; then
+                apt-get install -y -q git curl wget tar
+            else
+                apt-get install -y -q git curl wget tar ufw
+                systemctl enable ufw
+                systemctl start ufw
+                ufw allow 22/tcp
+                ufw --force enable
+            fi
+        elif command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1; then
+            PKG_MAN="yum"
+            command -v dnf >/dev/null 2>&1 && PKG_MAN="dnf"
+            $PKG_MAN update -y -q
+            if [ "$IS_NAT" = true ]; then
+                $PKG_MAN install -y -q git curl wget tar
+            else
+                $PKG_MAN install -y -q git curl wget tar firewalld
+                systemctl enable firewalld
+                systemctl start firewalld
+                firewall-cmd --permanent --add-service=ssh
+                firewall-cmd --reload
+            fi
         else
-            echo -e "${RED}[LỖI] Hệ điều hành không hỗ trợ tự động cài tường lửa.${NC}"
-            exit 1
+            if [ "$IS_NAT" = false ]; then
+                echo -e "${RED}[LỖI] Hệ điều hành không hỗ trợ tự động cài tường lửa.${NC}"
+                exit 1
+            fi
         fi
         ;;
 esac
