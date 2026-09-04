@@ -23,7 +23,7 @@ else
 fi
 
 PUBLIC_IP=$(curl -s --max-time 5 https://api.ipify.org || curl -s --max-time 5 https://ifconfig.me)
-LOCAL_IP=$(ip route get 1.1.1.1 2>/dev/null | grep -oP 'src \K\S+')
+LOCAL_IP=$(ip route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}')
 
 IS_NAT=false
 if [ -n "$PUBLIC_IP" ] && [ -n "$LOCAL_IP" ] && [ "$PUBLIC_IP" != "$LOCAL_IP" ]; then
@@ -40,10 +40,10 @@ case "$OS" in
             apt-get install -y -q git curl wget tar
         else
             apt-get install -y -q git curl wget tar ufw
-            systemctl enable ufw
-            systemctl start ufw
-            ufw allow 22/tcp
-            ufw --force enable
+            systemctl enable ufw 2>/dev/null || true
+            systemctl start ufw 2>/dev/null || true
+            ufw allow 22/tcp 2>/dev/null || true
+            ufw --force enable 2>/dev/null || true
         fi
         ;;
     centos|rhel|almalinux|rocky|fedora)
@@ -57,10 +57,20 @@ case "$OS" in
             $PKG_MAN install -y -q git curl wget tar
         else
             $PKG_MAN install -y -q git curl wget tar firewalld
-            systemctl enable firewalld
-            systemctl start firewalld
-            firewall-cmd --permanent --add-service=ssh
-            firewall-cmd --reload
+            systemctl enable firewalld 2>/dev/null || true
+            systemctl start firewalld 2>/dev/null || true
+            firewall-cmd --permanent --add-service=ssh 2>/dev/null || true
+            firewall-cmd --reload 2>/dev/null || true
+        fi
+        ;;
+    alpine)
+        apk update
+        if [ "$IS_NAT" = true ]; then
+            apk add --no-cache git curl wget tar
+        else
+            apk add --no-cache git curl wget tar ufw
+            ufw allow 22/tcp 2>/dev/null || true
+            ufw --force enable 2>/dev/null || true
         fi
         ;;
     *)
@@ -70,10 +80,10 @@ case "$OS" in
                 apt-get install -y -q git curl wget tar
             else
                 apt-get install -y -q git curl wget tar ufw
-                systemctl enable ufw
-                systemctl start ufw
-                ufw allow 22/tcp
-                ufw --force enable
+                systemctl enable ufw 2>/dev/null || true
+                systemctl start ufw 2>/dev/null || true
+                ufw allow 22/tcp 2>/dev/null || true
+                ufw --force enable 2>/dev/null || true
             fi
         elif command -v dnf >/dev/null 2>&1 || command -v yum >/dev/null 2>&1; then
             PKG_MAN="yum"
@@ -83,10 +93,19 @@ case "$OS" in
                 $PKG_MAN install -y -q git curl wget tar
             else
                 $PKG_MAN install -y -q git curl wget tar firewalld
-                systemctl enable firewalld
-                systemctl start firewalld
-                firewall-cmd --permanent --add-service=ssh
-                firewall-cmd --reload
+                systemctl enable firewalld 2>/dev/null || true
+                systemctl start firewalld 2>/dev/null || true
+                firewall-cmd --permanent --add-service=ssh 2>/dev/null || true
+                firewall-cmd --reload 2>/dev/null || true
+            fi
+        elif command -v apk >/dev/null 2>&1; then
+            apk update
+            if [ "$IS_NAT" = true ]; then
+                apk add --no-cache git curl wget tar
+            else
+                apk add --no-cache git curl wget tar ufw
+                ufw allow 22/tcp 2>/dev/null || true
+                ufw --force enable 2>/dev/null || true
             fi
         else
             if [ "$IS_NAT" = false ]; then
@@ -113,10 +132,15 @@ rm -f realm.tar.gz
 mkdir -p /etc/realm
 cp "$INSTALL_DIR/config/config.toml" /etc/realm/config.toml
 
-cp "$INSTALL_DIR/systemd/realm.service" /etc/systemd/system/realm.service
-systemctl daemon-reload
-systemctl enable realm
-systemctl start realm
+if command -v systemctl >/dev/null 2>&1; then
+    cp "$INSTALL_DIR/systemd/realm.service" /etc/systemd/system/realm.service
+    systemctl daemon-reload
+    systemctl enable realm
+    systemctl start realm
+else
+    pkill -f /usr/local/bin/realm 2>/dev/null || true
+    nohup /usr/local/bin/realm -c /etc/realm/config.toml >/dev/null 2>&1 &
+fi
 
 chmod +x "$INSTALL_DIR/scripts/"*.sh
 
